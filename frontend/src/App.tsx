@@ -12,7 +12,11 @@ import {
   Sparkles, 
   AlertCircle,
   Database,
-  RefreshCw
+  RefreshCw,
+  Menu,
+  X,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -83,6 +87,27 @@ export default function App() {
   const [predRating, setPredRating] = useState(8.5);
   const [predictedPrice, setPredictedPrice] = useState<number | null>(null);
   const [predicting, setPredicting] = useState(false);
+
+  // Theme & Mobile Menu states
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    const saved = localStorage.getItem('gaskeun-theme');
+    return (saved as 'dark' | 'light') || 'dark';
+  });
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (theme === 'light') {
+      document.body.classList.add('light-theme');
+    } else {
+      document.body.classList.remove('light-theme');
+    }
+    localStorage.setItem('gaskeun-theme', theme);
+  }, [theme]);
+
+  const handleTabChange = (tab: 'dashboard' | 'topsis' | 'ml') => {
+    setActiveTab(tab);
+    setIsMobileMenuOpen(false);
+  };
 
   // Scraping states
   const [scrapingStatus, setScrapingStatus] = useState<'idle' | 'scraping' | 'success' | 'error'>('idle');
@@ -325,19 +350,48 @@ export default function App() {
 
   return (
     <div className="app-container">
+      {/* Mobile Top Header */}
+      <div className="mobile-header">
+        <button className="mobile-menu-btn" onClick={() => setIsMobileMenuOpen(true)}>
+          <Menu size={24} />
+        </button>
+        <span className="logo-title" style={{ fontSize: '15px' }}>GASKEUN HOTEL ANALYSIS</span>
+        <button 
+          className="mobile-menu-btn" 
+          onClick={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')}
+        >
+          {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+        </button>
+      </div>
+
+      {/* Mobile Sidebar Overlay Backdrop */}
+      {isMobileMenuOpen && (
+        <div className="sidebar-overlay" onClick={() => setIsMobileMenuOpen(false)}></div>
+      )}
+
       {/* Sidebar Navigation */}
-      <aside className="sidebar">
-        <div className="logo-section">
-          <div className="logo-icon">
-            <Hotel size={22} />
+      <aside className={`sidebar ${isMobileMenuOpen ? 'open' : ''}`}>
+        <div className="logo-section" style={{ justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div className="logo-icon">
+              <Hotel size={22} />
+            </div>
+            <span className="logo-title" style={{ fontSize: '16px' }}>GASKEUN ANALYSIS</span>
           </div>
-          <span className="logo-title">GASKEUN HOTEL ANALYSIS</span>
+          <button 
+            className="mobile-menu-btn" 
+            onClick={() => setIsMobileMenuOpen(false)}
+            style={{ width: '32px', height: '32px' }}
+            id="close-sidebar-btn"
+          >
+            <X size={18} />
+          </button>
         </div>
 
         <nav className="nav-menu">
           <button 
             className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
-            onClick={() => setActiveTab('dashboard')}
+            onClick={() => handleTabChange('dashboard')}
           >
             <BarChart3 size={18} />
             Overview Dashboard
@@ -345,7 +399,7 @@ export default function App() {
 
           <button 
             className={`nav-item ${activeTab === 'topsis' ? 'active' : ''}`}
-            onClick={() => setActiveTab('topsis')}
+            onClick={() => handleTabChange('topsis')}
           >
             <Sliders size={18} />
             TOPSIS Decision Solver
@@ -353,10 +407,19 @@ export default function App() {
 
           <button 
             className={`nav-item ${activeTab === 'ml' ? 'active' : ''}`}
-            onClick={() => setActiveTab('ml')}
+            onClick={() => handleTabChange('ml')}
           >
             <Brain size={18} />
             ML Segmentation
+          </button>
+
+          <button 
+            className="nav-item" 
+            onClick={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')}
+            style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '12px' }}
+          >
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
           </button>
         </nav>
 

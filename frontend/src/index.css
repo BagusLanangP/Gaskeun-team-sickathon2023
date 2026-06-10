@@ -332,7 +332,7 @@ body {
   background-color: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  color: white;
+  color: var(--text-primary);
   font-family: var(--font-sans);
   font-size: 15px;
   outline: none;
@@ -496,3 +496,133 @@ body {
   font-weight: 600;
   color: white;
 }
+
+/* ==========================================
+   Light Mode Theme Variables & Overrides
+   ========================================== */
+body.light-theme {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #e2e8f0;
+  --bg-glass: rgba(255, 255, 255, 0.85);
+  --bg-glass-hover: rgba(241, 245, 249, 0.95);
+  
+  --border-color: rgba(0, 0, 0, 0.08);
+  --border-color-hover: rgba(0, 0, 0, 0.15);
+  
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  
+  --color-primary-glow: rgba(99, 102, 241, 0.15);
+  
+  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+}
+
+body.light-theme .logo-title {
+  background: linear-gradient(to right, #0f172a, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+body.light-theme .nav-item.active {
+  color: white;
+}
+
+body.light-theme .chart-tooltip {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+body.light-theme .chart-tooltip p.label {
+  color: var(--text-primary);
+}
+
+/* ==========================================
+   Responsive Mobile UI & Drawer Menu
+   ========================================== */
+.mobile-header {
+  display: none;
+  height: 64px;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 80;
+}
+
+.mobile-menu-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
+}
+
+.mobile-menu-btn:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+body.light-theme .mobile-menu-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 90;
+  animation: fadeIn var(--transition-fast);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform var(--transition-normal);
+  }
+  
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.4);
+  }
+
+  body.light-theme .sidebar.open {
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.1);
+  }
+  
+  .mobile-header {
+    display: flex;
+  }
+  
+  .main-content {
+    max-width: 100%;
+    padding: 20px;
+    margin-top: 64px;
+  }
+}
+
