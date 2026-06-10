@@ -11,7 +11,7 @@ from sklearn.linear_model import LinearRegression
 
 
 url: str= 'https://docs.google.com/spreadsheets/d/1RPLu_giMGLKn713muVT1AY8uM42GCwKKtnSC9ExUk6Q/edit?usp=sharing'
-conn: GSheetsConnection = st.experimental_connection('data_traveloka', type=GSheetsConnection)
+conn: GSheetsConnection = st.connection('data_traveloka', type=GSheetsConnection)
 
 df: pd.DataFrame = conn.read(spreadsheet=url, worksheet=0)
 
