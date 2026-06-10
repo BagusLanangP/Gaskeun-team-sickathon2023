@@ -295,7 +295,7 @@ export default function App() {
           <div className="logo-icon">
             <Hotel size={22} />
           </div>
-          <span className="logo-title">HARVESTHUB DSS</span>
+          <span className="logo-title">GASKEUN HOTEL ANALYSIS</span>
         </div>
 
         <nav className="nav-menu">
