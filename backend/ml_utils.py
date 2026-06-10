@@ -7,6 +7,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 import urllib.request
 import io
+import os
 
 # Google Sheet CSV URL
 SHEET_URL = 'https://docs.google.com/spreadsheets/d/1RPLu_giMGLKn713muVT1AY8uM42GCwKKtnSC9ExUk6Q/export?format=csv'
@@ -36,6 +37,19 @@ def load_and_preprocess_data():
         print(f"Error loading sheet online: {e}. Falling back to empty mockup dataframe.")
         # Mock dataframe in case of network issues
         df = pd.DataFrame(columns=['Hotel Name', 'Original price', 'Price after discount', 'Tax', 'Rating', 'location'])
+    
+    # Merge local harvested/scraped hotels if they exist
+    harvested_path = os.path.join(os.path.dirname(__file__), 'hotels_harvested.csv')
+    if os.path.isfile(harvested_path):
+        try:
+            local_df = pd.read_csv(harvested_path)
+            if not local_df.empty:
+                # Align columns and drop duplicates
+                df = pd.concat([df, local_df], ignore_index=True)
+                df = df.drop_duplicates(subset=['Hotel Name'], keep='first')
+                print(f"[+] Loaded and merged {len(local_df)} local harvested hotels.")
+        except Exception as ex:
+            print(f"[!] Error merging local harvested file: {ex}")
     
     # Process numeric price columns
     df['original_price_clean'] = df['Original price'].apply(clean_price)

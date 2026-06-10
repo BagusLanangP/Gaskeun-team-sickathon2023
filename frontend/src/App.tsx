@@ -10,7 +10,9 @@ import {
   Percent, 
   MapPin, 
   Sparkles, 
-  AlertCircle
+  AlertCircle,
+  Database,
+  RefreshCw
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -81,6 +83,40 @@ export default function App() {
   const [predRating, setPredRating] = useState(8.5);
   const [predictedPrice, setPredictedPrice] = useState<number | null>(null);
   const [predicting, setPredicting] = useState(false);
+
+  // Scraping states
+  const [scrapingStatus, setScrapingStatus] = useState<'idle' | 'scraping' | 'success' | 'error'>('idle');
+  const [scrapingMessage, setScrapingMessage] = useState('');
+  const [numItemsToScrape, setNumItemsToScrape] = useState(15);
+
+  const handleScrape = async () => {
+    try {
+      setScrapingStatus('scraping');
+      setScrapingMessage('Crawling hotel directories...');
+      
+      const res = await fetch(`${BACKEND_URL}/api/scrape`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ num_items: numItemsToScrape })
+      });
+      
+      if (!res.ok) throw new Error('Harvester returned an error.');
+      const data = await res.json();
+      
+      setScrapingStatus('success');
+      setScrapingMessage(data.message);
+      
+      // Reload hotel list
+      const hotelsRes = await fetch(`${BACKEND_URL}/api/hotels`);
+      if (hotelsRes.ok) {
+        const hotelsData = await hotelsRes.json();
+        setHotels(hotelsData);
+      }
+    } catch (err: any) {
+      setScrapingStatus('error');
+      setScrapingMessage(err.message || 'Scraper failed to run.');
+    }
+  };
 
   // Fetch initial data
   useEffect(() => {
@@ -339,6 +375,64 @@ export default function App() {
             <div className="page-header">
               <h1 className="page-title">Bali Hotel Analytics Dashboard</h1>
               <p className="page-subtitle">Real-time data visualization of hotel properties, pricing, and ratings across Bali</p>
+            </div>
+
+            {/* Scraper Panel */}
+            <div className="card" style={{ marginBottom: '24px', padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', borderLeft: '4px solid var(--color-primary)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '8px', backgroundColor: 'rgba(99, 102, 241, 0.1)', color: '#6366f1', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Database size={20} />
+                </div>
+                <div style={{ textAlign: 'left' }}>
+                  <h4 style={{ fontSize: '15px', fontWeight: 'bold' }}>Dynamic Web Data Harvester</h4>
+                  <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                    Scrape & merge new listings from travel registries to expand the dataset.
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+                {scrapingStatus === 'scraping' && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--text-secondary)' }}>
+                    <div className="spinner" style={{ width: '16px', height: '16px', borderWidth: '2px' }}></div>
+                    <span>{scrapingMessage}</span>
+                  </div>
+                )}
+                {scrapingStatus === 'success' && (
+                  <span style={{ fontSize: '13px', color: 'var(--color-success)', fontWeight: 500 }}>
+                    ✓ {scrapingMessage}
+                  </span>
+                )}
+                {scrapingStatus === 'error' && (
+                  <span style={{ fontSize: '13px', color: 'var(--color-danger)', fontWeight: 500 }}>
+                    ⚠ {scrapingMessage}
+                  </span>
+                )}
+
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <select 
+                    className="select-input" 
+                    style={{ width: '130px', padding: '8px 12px', fontSize: '13px' }}
+                    value={numItemsToScrape}
+                    onChange={(e) => setNumItemsToScrape(Number(e.target.value))}
+                    disabled={scrapingStatus === 'scraping'}
+                  >
+                    <option value="15">15 Hotels</option>
+                    <option value="30">30 Hotels</option>
+                    <option value="50">50 Hotels</option>
+                  </select>
+
+                  <button 
+                    className="button-primary" 
+                    style={{ padding: '8px 16px', fontSize: '13px', width: 'auto' }}
+                    onClick={handleScrape}
+                    disabled={scrapingStatus === 'scraping'}
+                  >
+                    <RefreshCw size={14} />
+                    Harvest Data
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* KPI Cards */}

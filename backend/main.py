@@ -11,6 +11,7 @@ from backend.ml_utils import (
     get_kmeans_clusters, 
     get_price_prediction_model
 )
+from backend.scraper import run_harvest
 
 app = FastAPI(
     title="Bali Hotel Decision Support System API",
@@ -189,3 +190,26 @@ def predict_price(req: PredictRequest):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
+
+class ScrapeRequest(BaseModel):
+    num_items: int = 15
+
+@app.post("/api/scrape")
+def trigger_scraping(req: ScrapeRequest):
+    try:
+        # Trigger scraper script
+        num_scraped = run_harvest(num_items=req.num_items)
+        
+        # Reload dataset and model cache with the new entries
+        global GLOBAL_DF, PREDICTIVE_MODEL, FREQUENT_LOCATIONS
+        GLOBAL_DF = load_and_preprocess_data()
+        if not GLOBAL_DF.empty:
+            PREDICTIVE_MODEL, FREQUENT_LOCATIONS = get_price_prediction_model(GLOBAL_DF)
+        
+        return {
+            "status": "success",
+            "message": f"Successfully scraped and merged {num_scraped} new hotels from Bali registry.",
+            "total_records": len(GLOBAL_DF)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Scraper error: {str(e)}")
