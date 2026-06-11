@@ -32,7 +32,7 @@ import {
   Area 
 } from 'recharts';
 
-const BACKEND_URL = 'http://localhost:8000';
+const BACKEND_URL = window.location.hostname === 'localhost' ? 'http://localhost:8000' : '';
 
 interface HotelData {
   name: string;
